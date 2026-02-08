@@ -1,30 +1,91 @@
-<html>
+<!doctype html>
+<html lang="en">
 <head>
-    <title>Your Website Title</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Buxton FC – Fixtures & Results</title>
+
+  <!-- Refresh the whole page every 15 minutes -->
+  <meta http-equiv="refresh" content="900">
+
+  <style>
+    body { margin: 0; font-family: Arial, sans-serif; background: #0b0b0b; color: #fff; }
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 18px; }
+    h1 { font-size: 56px; margin: 0 0 6px; }
+    .sub { font-size: 22px; opacity: 0.8; margin: 0 0 18px; }
+    .grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
+    .card { background: #000; border-radius: 14px; padding: 14px; }
+    h2 { font-size: 34px; margin: 0 0 10px; }
+    table { width: 100%; border-collapse: collapse; font-size: 30px; }
+    td { padding: 10px 6px; border-bottom: 1px solid rgba(255,255,255,0.15); vertical-align: top; }
+    .dt { width: 280px; white-space: nowrap; opacity: 0.9; }
+    .muted { opacity: 0.75; }
+  </style>
 </head>
 <body>
+  <div class="wrap">
+    <h1>Buxton FC</h1>
+    <div class="sub">Fixtures & results (auto-updates)</div>
 
-    <!-- Load jQuery -->
-    <script src="//code.jquery.com/jquery-2.1.4.min.js"></script>
+    <div class="grid">
+      <div class="card">
+        <h2>Next fixtures</h2>
+        <table id="next"><tr><td class="muted">Loading…</td></tr></table>
+      </div>
 
-    <!-- Load Stats FC Fixtures SDK -->
-    <script>
-        (function(d, s, id) {
-            var js, fjs = d.getElementsByTagName(s)[0];
-            if (d.getElementById(id)) return;
-            js = d.createElement(s); js.id = id;
-            js.src = 'https://cdn.statsfc.com/js/fixtures.js';
-            fjs.parentNode.insertBefore(js, fjs);
-        }(document, 'script', 'statsfc-fixtures-js'));
-    </script>
-
-    <!-- Your fixtures here -->
-    <div class="statsfc-fixtures"
-        data-key="YOUR STATSFC KEY"
-        data-competition="EPL"
-        data-show-badges="true"
-        data-use-default-css="true">
+      <div class="card">
+        <h2>Last results</h2>
+        <table id="last"><tr><td class="muted">Loading…</td></tr></table>
+      </div>
     </div>
+  </div>
 
+  <script>
+    const TEAM_ID = "PUT_TEAM_ID_HERE";
+    const KEY = "3"; // TheSportsDB free/test key
+    const nextUrl = `https://www.thesportsdb.com/api/v1/json/${KEY}/eventsnext.php?id=${TEAM_ID}`;
+    const lastUrl = `https://www.thesportsdb.com/api/v1/json/${KEY}/eventslast.php?id=${TEAM_ID}`;
+
+    function safeText(s) { return (s ?? "").toString(); }
+
+    function formatRow(ev) {
+      // dateEvent = YYYY-MM-DD, strTime may be HH:MM:SS
+      const date = safeText(ev.dateEvent);
+      const time = safeText(ev.strTime).slice(0,5); // HH:MM
+      const dt = (date ? date : "TBC") + (time ? ` ${time}` : "");
+      const home = safeText(ev.strHomeTeam);
+      const away = safeText(ev.strAwayTeam);
+
+      // Scores may be null for fixtures
+      const hs = ev.intHomeScore;
+      const as = ev.intAwayScore;
+      const score = (hs !== null && hs !== "" && as !== null && as !== "") ? ` — ${hs}-${as}` : "";
+
+      return `<tr>
+        <td class="dt">${dt}</td>
+        <td>${home} vs ${away}${score}</td>
+      </tr>`;
+    }
+
+    async function loadTable(url, tableId, fieldName) {
+      const table = document.getElementById(tableId);
+      try {
+        const res = await fetch(url, { cache: "no-store" });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        const events = data?.[fieldName] ?? [];
+        if (!events.length) {
+          table.innerHTML = `<tr><td class="muted">No games found.</td></tr>`;
+          return;
+        }
+        table.innerHTML = events.map(formatRow).join("");
+      } catch (e) {
+        table.innerHTML = `<tr><td class="muted">Failed to load (${safeText(e.message)}).</td></tr>`;
+      }
+    }
+
+    loadTable(nextUrl, "next", "events");
+    loadTable(lastUrl, "last", "results");
+  </script>
 </body>
 </html>
