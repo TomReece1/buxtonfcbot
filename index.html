@@ -1,27 +1,30 @@
-<!doctype html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Buxton FC – Fixtures & Results</title>
-
-  <!-- Optional: refresh the whole page every 30 minutes -->
-  <meta http-equiv="refresh" content="1800">
-
-  <style>
-    body { margin: 0; font-family: Arial, sans-serif; background: #111; color: #fff; }
-    .wrap { max-width: 1100px; margin: 0 auto; padding: 16px; }
-    h1 { font-size: 48px; margin: 0 0 12px; }
-    .widget { background: #000; border-radius: 12px; padding: 12px; }
-  </style>
+    <title>Your Website Title</title>
 </head>
 <body>
-  <div class="wrap">
-    <h1>Buxton FC</h1>
-    <div class="widget">
-      <div class="fwp-embed" data-url="buxton/fixtures-results?utm_source=chatgpt.com"></div>
-<script src="https://www.footballwebpages.co.uk/embed.js" defer></script>
+
+    <!-- Load jQuery -->
+    <script src="//code.jquery.com/jquery-2.1.4.min.js"></script>
+
+    <!-- Load Stats FC Fixtures SDK -->
+    <script>
+        (function(d, s, id) {
+            var js, fjs = d.getElementsByTagName(s)[0];
+            if (d.getElementById(id)) return;
+            js = d.createElement(s); js.id = id;
+            js.src = 'https://cdn.statsfc.com/js/fixtures.js';
+            fjs.parentNode.insertBefore(js, fjs);
+        }(document, 'script', 'statsfc-fixtures-js'));
+    </script>
+
+    <!-- Your fixtures here -->
+    <div class="statsfc-fixtures"
+        data-key="YOUR STATSFC KEY"
+        data-competition="EPL"
+        data-show-badges="true"
+        data-use-default-css="true">
     </div>
-  </div>
+
 </body>
 </html>
